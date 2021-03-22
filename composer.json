@@ -1,0 +1,18 @@
+{
+	"name": "b13/umami",
+	"type": "typo3-cms-extension",
+	"description": "Umami Tracking for your TYPO3 site",
+	"require": {
+		"typo3/cms-backend": "*"
+	},
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "umami"
+		}
+	},
+	"autoload": {
+		"psr-4": {
+			"B13\\Umami\\": "Classes"
+		}
+	}
+}
