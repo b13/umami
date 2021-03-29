@@ -6,17 +6,14 @@
 			<trans-unit id="module.action.list.headline">
 				<source>Umami Statistics</source>
 			</trans-unit>
-			<trans-unit id="module.action.list.subline">
-				<source>Available sites with tracking</source>
+			<trans-unit id="module.noSites">
+				<source>Sorry. RThere are either no sites configured or you do not have permissions to view any statistics.</source>
 			</trans-unit>
-			<trans-unit id="module.action.list.description">
-				<source>Choose a site to see statistics.</source>
+			<trans-unit id="module.dropdown.label">
+				<source>Show statistics for the following site:</source>
 			</trans-unit>
 			<trans-unit id="module.action.show.headline">
 				<source>Umami statistic for site "%s"</source>
-			</trans-unit>
-			<trans-unit id="module.action.show.button.back.label">
-				<source>back</source>
 			</trans-unit>
 		</body>
 	</file>
