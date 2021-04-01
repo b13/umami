@@ -20,13 +20,13 @@ use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class StatisticsController implements RequestHandlerInterface
 {
-    const UMAMI_STATISTICS_URL_FIELD = 'umami_statistic_url';
-    const MODULE_ROUTE = 'web_umami';
+    protected const UMAMI_STATISTICS_URL_FIELD = 'umami_statistic_url';
+    protected const MODULE_ROUTE = 'web_umami';
 
     /**
      * @var ServerRequestInterface
@@ -54,40 +54,59 @@ class StatisticsController implements RequestHandlerInterface
     protected $languageService;
 
     /**
-     * @var array
+     * @var SiteFinder
+     */
+    protected $siteFinder;
+
+    /**
+     * @var PageRepository
+     */
+    protected $pageRepository;
+
+    /**
+     * @var array<mixed>
      */
     protected $sites = [];
 
     /**
-     * @var array
+     * @var array<int>
      */
     protected $userTsPermissions = [];
 
-    public function __construct(ModuleTemplate $moduleTemplate, UriBuilder $uriBuilder, LanguageService $languageService, StandaloneView $view)
-    {
+    public function __construct(
+        ModuleTemplate $moduleTemplate,
+        UriBuilder $uriBuilder,
+        LanguageService $languageService,
+        StandaloneView $view,
+        SiteFinder $siteFinder,
+        PageRepository $pageRepository
+    ) {
         $this->moduleTemplate = $moduleTemplate;
         $this->uriBuilder = $uriBuilder;
         $this->languageService = $languageService;
         $this->view = $view;
+        $this->siteFinder = $siteFinder;
+        $this->pageRepository = $pageRepository;
 
         $this->initialiseView();
         $this->languageService->includeLLFile('EXT:umami/Resources/Private/Language/locallang.xlf');
-        if ($GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages'] !== null) {
-            $this->userTsPermissions = explode(',', $GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages']);
+        if ($GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages'] ?? false) {
+            $this->userTsPermissions = array_map(
+                'intval',
+                explode(',', $GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages'])
+            );
         }
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->request = $request;
-
         $this->getSites();
         if (count($this->sites) > 0) {
             if ($request->getQueryParams()['identifier']) {
                 $identifierToGet = $request->getQueryParams()['identifier'];
                 $GLOBALS['BE_USER']->pushModuleData(self::MODULE_ROUTE, ['identifier' => $identifierToGet]);
             } else {
-                $identifierToGet = (string)$GLOBALS['BE_USER']->getModuleData(self::MODULE_ROUTE)['identifier'];;
+                $identifierToGet = (string)$GLOBALS['BE_USER']->getModuleData(self::MODULE_ROUTE)['identifier'];
             }
 
             if ($identifierToGet !== '' && array_key_exists($identifierToGet, $this->sites)) {
@@ -113,27 +132,31 @@ class StatisticsController implements RequestHandlerInterface
         $this->view->setTemplateRootPaths(['EXT:umami/Resources/Private/Templates']);
     }
 
+    /**
+     * @param array<mixed> $siteConfiguration
+     * @return string
+     */
     protected function getSiteName(array $siteConfiguration): string
     {
-        if ($siteConfiguration['websiteTitle']) {
+        if ($siteConfiguration['websiteTitle'] ?? false) {
             return $siteConfiguration['websiteTitle'];
         }
 
-        $rootPage = GeneralUtility::makeInstance(PageRepository::class)->getPage($siteConfiguration['rootPageId']);
+        $rootPage = $this->pageRepository->getPage($siteConfiguration['rootPageId']);
         return $rootPage['title'];
     }
 
     protected function userHasAccessToSite(int $rootPage): bool
     {
-        $page = GeneralUtility::makeInstance(PageRepository::class)->getPage($rootPage);
+        $page = $this->pageRepository->getPage($rootPage);
 
-        return $GLOBALS['BE_USER']->doesUserHaveAccess($page, 1)
-            || in_array($page['uid'], $this->userTsPermissions);
+        return $GLOBALS['BE_USER']->doesUserHaveAccess($page, Permission::PAGE_SHOW)
+            || in_array($page['uid'], $this->userTsPermissions, true);
     }
 
     protected function getSites(): void
     {
-        $sites = GeneralUtility::makeInstance(SiteFinder::class)->getAllSites();
+        $sites = $this->siteFinder->getAllSites();
 
         $sitesForModule = [];
         foreach ($sites as $site) {
@@ -162,7 +185,13 @@ class StatisticsController implements RequestHandlerInterface
         foreach ($this->sites as $site) {
             $item = $menu->makeMenuItem()
                 ->setHref(
-                    $this->uriBuilder->buildUriFromRoute(self::MODULE_ROUTE, ['action' => 'show', 'identifier' => $site['identifier']])
+                    (string)$this->uriBuilder->buildUriFromRoute(
+                        self::MODULE_ROUTE,
+                        [
+                            'action' => 'show',
+                            'identifier' => $site['identifier']
+                        ]
+                    )
                 )
                 ->setTitle($site['name']);
 

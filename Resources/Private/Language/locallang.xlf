@@ -7,7 +7,7 @@
 				<source>Umami Statistics</source>
 			</trans-unit>
 			<trans-unit id="module.noSites">
-				<source>Sorry. RThere are either no sites configured or you do not have permissions to view any statistics.</source>
+				<source>Sorry. There are either no sites configured or you do not have permissions to view any statistics.</source>
 			</trans-unit>
 			<trans-unit id="module.dropdown.label">
 				<source>Show statistics for the following site:</source>
