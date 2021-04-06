@@ -3,7 +3,7 @@
 	"type": "typo3-cms-extension",
 	"description": "Umami Tracking for your TYPO3 site",
 	"require": {
-		"typo3/cms-backend": "*"
+		"typo3/cms-backend": "^10"
 	},
 	"extra": {
 		"typo3/cms": {
