@@ -100,13 +100,13 @@ class StatisticsController implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->getSites();
+        $this->buildSites();
         if (count($this->sites) > 0) {
-            if ($request->getQueryParams()['identifier']) {
+            if ($request->getQueryParams()['identifier'] ?? false) {
                 $identifierToGet = $request->getQueryParams()['identifier'];
                 $GLOBALS['BE_USER']->pushModuleData(self::MODULE_ROUTE, ['identifier' => $identifierToGet]);
             } else {
-                $identifierToGet = (string)$GLOBALS['BE_USER']->getModuleData(self::MODULE_ROUTE)['identifier'];
+                $identifierToGet = (string)($GLOBALS['BE_USER']->getModuleData(self::MODULE_ROUTE)['identifier'] ?? '');
             }
 
             if ($identifierToGet !== '' && array_key_exists($identifierToGet, $this->sites)) {
@@ -154,7 +154,7 @@ class StatisticsController implements RequestHandlerInterface
             || in_array($page['uid'], $this->userTsPermissions, true);
     }
 
-    protected function getSites(): void
+    protected function buildSites(): void
     {
         $sites = $this->siteFinder->getAllSites();
 
