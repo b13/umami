@@ -5,7 +5,7 @@ $GLOBALS['SiteConfiguration']['site']['columns']['umami_statistic_url'] = [
     'label' => 'Statistic url',
     'config' => [
         'type' => 'input',
-        'renderType' => 'inputLink'
+        'renderType' => 'inputLink',
     ],
 ];
 

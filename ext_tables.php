@@ -1,4 +1,5 @@
 <?php
+
 defined('TYPO3') or die('Access denied!');
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addModule(
@@ -13,6 +14,6 @@ defined('TYPO3') or die('Access denied!');
         'icon' => 'EXT:umami/Resources/Public/Icons/module_info.svg',
         'labels' => 'LLL:EXT:umami/Resources/Private/Language/locallang_mod.xlf',
         'navigationComponentId' => '',
-        'inheritNavigationComponentFromMainModule' => false
+        'inheritNavigationComponentFromMainModule' => false,
     ]
 );

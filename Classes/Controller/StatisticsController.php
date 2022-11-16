@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace B13\Umami\Controller;
@@ -170,7 +171,7 @@ class StatisticsController implements RequestHandlerInterface
             $sitesForModule[$site->getIdentifier()] = [
                 'name' => $this->getSitename($site->getConfiguration()),
                 'identifier' => $site->getIdentifier(),
-                'statisticsUrl' => $site->getConfiguration()[self::UMAMI_STATISTICS_URL_FIELD]
+                'statisticsUrl' => $site->getConfiguration()[self::UMAMI_STATISTICS_URL_FIELD],
             ];
         }
 
@@ -189,7 +190,7 @@ class StatisticsController implements RequestHandlerInterface
                         self::MODULE_ROUTE,
                         [
                             'action' => 'show',
-                            'identifier' => $site['identifier']
+                            'identifier' => $site['identifier'],
                         ]
                     )
                 )
