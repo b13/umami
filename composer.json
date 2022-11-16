@@ -15,5 +15,11 @@
 		"psr-4": {
 			"B13\\Umami\\": "Classes"
 		}
+	},
+	"config": {
+		"sort-packages": true
+	},
+	"require-dev": {
+		"typo3/coding-standards": "^0.5.5"
 	}
 }
