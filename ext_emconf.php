@@ -10,4 +10,11 @@ $EM_CONF[$_EXTKEY] = [
     'author' => 'b13 GmbH',
     'author_email' => 'typo3@b13.com',
     'author_company' => 'b13 GmbH',
+    'constraints' => [
+        'depends' => [
+            'typo3' => '10.0.0-11.5.99',
+        ],
+        'conflicts' => [],
+        'suggests' => [],
+    ],
 ];
