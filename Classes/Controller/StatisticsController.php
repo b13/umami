@@ -17,11 +17,14 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class StatisticsController implements RequestHandlerInterface
@@ -29,68 +32,27 @@ class StatisticsController implements RequestHandlerInterface
     protected const UMAMI_STATISTICS_URL_FIELD = 'umami_statistic_url';
     protected const MODULE_ROUTE = 'web_umami';
 
-    /**
-     * @var ServerRequestInterface
-     */
-    protected $request;
-
-    /**
-     * @var ModuleTemplate
-     */
-    protected $moduleTemplate;
-
-    /**
-     * @var StandaloneView
-     */
-    protected $view;
-
-    /**
-     * @var UriBuilder
-     */
-    protected $uriBuilder;
-
-    /**
-     * @var LanguageService
-     */
-    protected $languageService;
-
-    /**
-     * @var SiteFinder
-     */
-    protected $siteFinder;
-
-    /**
-     * @var PageRepository
-     */
-    protected $pageRepository;
-
+    protected ModuleTemplate $moduleTemplate;
+    protected LanguageService $languageService;
     /**
      * @var array<mixed>
      */
     protected $sites = [];
-
     /**
      * @var array<int>
      */
     protected $userTsPermissions = [];
 
     public function __construct(
-        ModuleTemplate $moduleTemplate,
-        UriBuilder $uriBuilder,
-        LanguageService $languageService,
-        StandaloneView $view,
-        SiteFinder $siteFinder,
-        PageRepository $pageRepository
+        protected ModuleTemplateFactory $moduleTemplateFactory,
+        protected UriBuilder $uriBuilder,
+        protected SiteFinder $siteFinder,
+        protected PageRepository $pageRepository,
+        protected StandaloneView $view,
+        protected LanguageServiceFactory $languageServiceFactory
     ) {
-        $this->moduleTemplate = $moduleTemplate;
-        $this->uriBuilder = $uriBuilder;
-        $this->languageService = $languageService;
-        $this->view = $view;
-        $this->siteFinder = $siteFinder;
-        $this->pageRepository = $pageRepository;
-
         $this->initialiseView();
-        $this->languageService->includeLLFile('EXT:umami/Resources/Private/Language/locallang.xlf');
+        $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER']);
         if ($GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages'] ?? false) {
             $this->userTsPermissions = array_map(
                 'intval',
@@ -102,6 +64,7 @@ class StatisticsController implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $this->buildSites();
+        $this->moduleTemplate = $this->moduleTemplateFactory->create($request);
         if (count($this->sites) > 0) {
             if ($request->getQueryParams()['identifier'] ?? false) {
                 $identifierToGet = $request->getQueryParams()['identifier'];
@@ -181,7 +144,7 @@ class StatisticsController implements RequestHandlerInterface
     protected function generateMenu(string $currentIdentifier = ''): void
     {
         $menu = $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
-        $menu->setIdentifier('SitesWithTracking')->setLabel($this->languageService->getLL('module.dropdown.label'));
+        $menu->setIdentifier('SitesWithTracking')->setLabel($this->languageService->sL('module.dropdown.label'));
 
         foreach ($this->sites as $site) {
             $item = $menu->makeMenuItem()

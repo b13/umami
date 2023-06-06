@@ -8,4 +8,5 @@ services:
     resource: '../Classes/*'
 
   B13\Umami\Controller\StatisticsController:
+    tags: ['backend.controller']
     public: true
