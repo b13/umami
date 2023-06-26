@@ -3,7 +3,7 @@
 return [
     'web_umami' => [
         'parent' => 'web',
-        'access' => 'user,group',
+        'access' => 'user',
         'workspaces' => 'live',
         'path' => '/module/umami',
         'labels' => 'LLL:EXT:umami/Resources/Private/Language/locallang_mod.xlf',

@@ -143,7 +143,7 @@ class StatisticsController implements RequestHandlerInterface
     protected function generateMenu(string $currentIdentifier = ''): void
     {
         $menu = $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
-        $menu->setIdentifier('SitesWithTracking')->setLabel($this->languageService->sL('module.dropdown.label'));
+        $menu->setIdentifier('SitesWithTracking')->setLabel($this->languageService->sL('LLL:EXT:umami/Resources/Private/Language/locallang.xlf:module.dropdown.label'));
 
         foreach ($this->sites as $site) {
             $item = $menu->makeMenuItem()
