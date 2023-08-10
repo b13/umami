@@ -29,7 +29,7 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 class StatisticsController implements RequestHandlerInterface
 {
     protected const UMAMI_STATISTICS_URL_FIELD = 'umami_statistic_url';
-    protected const MODULE_ROUTE = 'web_umami';
+    protected const MODULE_ROUTE = 'site_umami';
 
     protected ModuleTemplate $moduleTemplate;
     protected LanguageService $languageService;
