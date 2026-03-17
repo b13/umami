@@ -46,7 +46,6 @@ class StatisticsController implements RequestHandlerInterface
          */
         protected array $userTsPermissions = [],
     ) {
-        $this->initialiseView();
         $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER']);
         if ($GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages'] ?? false) {
             $this->userTsPermissions = array_map(
@@ -107,7 +106,7 @@ class StatisticsController implements RequestHandlerInterface
         $sitesForModule = [];
         foreach ($sites as $site) {
             if (
-                !$site->getConfiguration()[self::UMAMI_STATISTICS_URL_FIELD] ||
+                !($site->getConfiguration()[self::UMAMI_STATISTICS_URL_FIELD] ?? false) ||
                 !$this->userHasAccessToSite($site->getConfiguration()['rootPageId'])
             ) {
                 continue;
