@@ -15,17 +15,17 @@ namespace B13\Umami\Controller;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
-use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Fluid\View\StandaloneView;
 
+#[AsController]
 class StatisticsController implements RequestHandlerInterface
 {
     protected const UMAMI_STATISTICS_URL_FIELD = 'umami_statistic_url';
@@ -33,24 +33,19 @@ class StatisticsController implements RequestHandlerInterface
 
     protected ModuleTemplate $moduleTemplate;
     protected LanguageService $languageService;
-    /**
-     * @var array<mixed>
-     */
-    protected $sites = [];
-    /**
-     * @var array<int>
-     */
-    protected $userTsPermissions = [];
 
     public function __construct(
         protected ModuleTemplateFactory $moduleTemplateFactory,
         protected UriBuilder $uriBuilder,
         protected SiteFinder $siteFinder,
         protected PageRepository $pageRepository,
-        protected StandaloneView $view,
-        protected LanguageServiceFactory $languageServiceFactory
+        protected LanguageServiceFactory $languageServiceFactory,
+        protected array $sites = [],
+        /**
+         * @var array<int>
+         */
+        protected array $userTsPermissions = [],
     ) {
-        $this->initialiseView();
         $this->languageService = $this->languageServiceFactory->createFromUserPreferences($GLOBALS['BE_USER']);
         if ($GLOBALS['BE_USER']->getTSConfig()['umami.']['allowedRootPages'] ?? false) {
             $this->userTsPermissions = array_map(
@@ -78,27 +73,14 @@ class StatisticsController implements RequestHandlerInterface
                 $site = reset($this->sites);
             }
 
-            $this->view->setTemplate('Show');
-            $this->view->assign('site', $site);
+            $this->moduleTemplate->assign('site', $site);
             $this->generateMenu($identifierToGet);
-        } else {
-            $this->view->setTemplate('NoSites');
+            return $this->moduleTemplate->renderResponse('Statistics/Show');
         }
+        return $this->moduleTemplate->renderResponse('Statistics/NoSites');
 
-        $this->moduleTemplate->setContent($this->view->render());
-        return new HtmlResponse($this->moduleTemplate->renderContent());
     }
 
-    protected function initialiseView(): void
-    {
-        $this->view->setLayoutRootPaths(['EXT:umami/Resources/Private/Layouts']);
-        $this->view->setTemplateRootPaths(['EXT:umami/Resources/Private/Templates']);
-    }
-
-    /**
-     * @param array<mixed> $siteConfiguration
-     * @return string
-     */
     protected function getSiteName(array $siteConfiguration): string
     {
         if ($siteConfiguration['websiteTitle'] ?? false) {
@@ -124,7 +106,7 @@ class StatisticsController implements RequestHandlerInterface
         $sitesForModule = [];
         foreach ($sites as $site) {
             if (
-                !$site->getConfiguration()[self::UMAMI_STATISTICS_URL_FIELD] ||
+                !($site->getConfiguration()[self::UMAMI_STATISTICS_URL_FIELD] ?? false) ||
                 !$this->userHasAccessToSite($site->getConfiguration()['rootPageId'])
             ) {
                 continue;
