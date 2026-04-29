@@ -5,7 +5,7 @@ return [
         'labels' => 'LLL:EXT:umami/Resources/Private/Language/locallang_mod_insights.xlf',
         'iconIdentifier' => 'module-insights',
         'extensionName' => 'umami',
-        'position' => ['after' => 'web'],
+        'position' => ['after' => 'content'],
     ],
     'insights_umami' => [
         'parent' => 'insights',
@@ -14,7 +14,7 @@ return [
         'path' => '/module/umami',
         'labels' => 'LLL:EXT:umami/Resources/Private/Language/locallang_mod_umami.xlf',
         'extensionName' => 'Umami',
-        'icon' => 'EXT:umami/Resources/Public/Icons/module_info.svg',
+        'iconIdentifier' => 'module-umami',
         'inheritNavigationComponentFromMainModule' => false,
         'routes' => [
             '_default' => [
